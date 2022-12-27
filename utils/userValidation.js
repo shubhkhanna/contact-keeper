@@ -1,4 +1,5 @@
 const { check, validationResult } = require("express-validator");
+const { StatusCodes } = require("../config/statusCodes");
 
 const validateSignup = [
   check("name").trim().not().isEmpty().withMessage("Name is required!"),
@@ -32,7 +33,7 @@ const validate = (req, res, next) => {
 
   if (!errors.length) return next();
 
-  res.status(400);
+  res.status(StatusCodes.BAD_REQUEST);
   throw new Error(errors[0].msg);
 };
 

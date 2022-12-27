@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const { JWT_SECRET } = require("../config/keys");
 const User = require("../models/userModel");
+const { StatusCodes } = require("../config/statusCodes");
 
 const authHandler = asyncHandler(async (req, res, next) => {
   let token;
@@ -23,13 +24,13 @@ const authHandler = asyncHandler(async (req, res, next) => {
     } catch (error) {
       // if token is expired
       if (error.name === "TokenExpiredError") {
-        res.status(401);
+        res.status(StatusCodes.UNAUTHORIZED);
         throw new Error("Token Expired!");
       }
 
       // if token is invalid
       if (error.name === "JsonWebTokenError") {
-        res.status(401);
+        res.status(StatusCodes.UNAUTHORIZED);
         throw new Error("Invalid Token!");
       }
     }
@@ -37,7 +38,7 @@ const authHandler = asyncHandler(async (req, res, next) => {
 
   // If no token
   if (!token) {
-    res.status(401);
+    res.status(StatusCodes.UNAUTHORIZED);
     throw new Error("Unauthorized Access, No Token Provided!");
   }
 });

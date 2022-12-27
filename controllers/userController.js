@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const { StatusCodes } = require("../config/statusCodes");
 const { Logger } = require("../helpers/logger");
 const {
   hashToken,
@@ -20,7 +21,7 @@ const signupUser = asyncHandler(async (req, res) => {
 
   // If User Exists
   if (user) {
-    res.status(400);
+    res.status(StatusCodes.BAD_REQUEST);
     throw new Error("Email Already Exists!");
   }
 
@@ -36,7 +37,7 @@ const signupUser = asyncHandler(async (req, res) => {
   Logger.info(`${newUser.name} - ${newUser.email} just signed up!`);
 
   // Sending response
-  res.status(201).json({
+  res.status(StatusCodes.CREATED).json({
     user: {
       id: newUser._id,
       name: newUser.name,
@@ -58,7 +59,7 @@ const signinUser = asyncHandler(async (req, res) => {
 
   // If User Does Not Exist
   if (!user) {
-    res.status(404);
+    res.status(StatusCodes.NOT_FOUND);
     throw new Error("Account Does Not Exist!");
   }
 
@@ -67,7 +68,7 @@ const signinUser = asyncHandler(async (req, res) => {
 
   // If Password Does Not Match
   if (!isMatch) {
-    res.status(401);
+    res.status(StatusCodes.UNAUTHORIZED);
     throw new Error("Invalid Email or Password!");
   }
 
@@ -75,7 +76,7 @@ const signinUser = asyncHandler(async (req, res) => {
   Logger.info(`${user.name} - ${user.email} just logged in!`);
 
   // Sending response
-  res.status(201).json({
+  res.status(StatusCodes.OK).json({
     user: {
       id: user._id,
       name: user.name,
