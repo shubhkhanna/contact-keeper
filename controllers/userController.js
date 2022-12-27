@@ -1,6 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const { Logger } = require("../helpers/logger");
-const { hashToken, generateToken } = require("../helpers/tokenHelper");
+const {
+  hashToken,
+  generateToken,
+  compareToken,
+} = require("../helpers/tokenHelper");
 
 const User = require("../models/userModel");
 
@@ -42,4 +46,43 @@ const signupUser = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { signupUser };
+// @decs Signin User & Get Token
+// @route POST /v1/user/signin
+// @access PUBLIC
+const signinUser = asyncHandler(async (req, res) => {
+  // Get Data From Request
+  const { email, password } = req.body;
+
+  // Check if User Exists
+  const user = await User.findOne({ email });
+
+  // If User Does Not Exist
+  if (!user) {
+    res.status(404);
+    throw new Error("Account Does Not Exist!");
+  }
+
+  // Check password
+  const isMatch = await compareToken(password, user.password);
+
+  // If Password Does Not Match
+  if (!isMatch) {
+    res.status(401);
+    throw new Error("Invalid Email or Password!");
+  }
+
+  // Logging User In Console
+  Logger.info(`${user.name} - ${user.email} just logged in!`);
+
+  // Sending response
+  res.status(201).json({
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+    },
+    accessToken: generateToken(user._id),
+  });
+});
+
+module.exports = { signupUser, signinUser };
