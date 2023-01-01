@@ -18,7 +18,7 @@ const authHandler = asyncHandler(async (req, res, next) => {
       //   decoding the token
       const decoded = jwt.verify(token, JWT_SECRET);
 
-      req.user = await User.findById(decoded.userId).select("-password");
+      req.user = await User.findById(decoded.userId);
 
       next();
     } catch (error) {
