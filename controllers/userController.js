@@ -2,13 +2,21 @@ const asyncHandler = require("express-async-handler");
 const { StatusCodes } = require("../config/statusCodes");
 const { Logger } = require("../helpers/logger");
 const {
-  hashToken,
-  generateToken,
-  compareToken,
-} = require("../helpers/tokenHelper");
+  hashPassword,
+  getJwtToken,
+  comparePassword,
+} = require("../utils/authUtil");
 
 const User = require("../models/userModel");
 const SendResponse = require("../utils/sendResponseUtil");
+
+// Cookie Options
+const cookieOptions = {
+  maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days validity
+  httpOnly: true,
+  // secure: true, // Uncomment this if you are using HTTPS
+  sameSite: "none",
+};
 
 // @decs Create New User
 // @route POST /v1/user/signup
@@ -30,31 +38,23 @@ const signupUser = asyncHandler(async (req, res) => {
   const newUser = new User({
     name,
     email,
-    password: await hashToken(password),
+    password: await hashPassword(password),
   });
 
   await newUser.save();
 
   Logger.info(`${newUser.name} - ${newUser.email} just signed up!`);
 
-  // Creating a user object
-  const userObj = {
-    user: {
-      id: newUser._id,
-      name: newUser.name,
-      email: newUser.email,
-    },
-    accessToken: generateToken(newUser._id),
-  };
+  const accessToken = getJwtToken(newUser._id);
+  const userObj = { id: newUser._id, name: newUser.name, email: newUser.email };
+
+  // Setting Cookies
+  res
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("user", userObj, cookieOptions);
 
   // Sending response
-  SendResponse(
-    res,
-    StatusCodes.CREATED,
-    "Registered Successfully!",
-    true,
-    userObj
-  );
+  SendResponse(res, StatusCodes.CREATED, "Registered Successfully!", true);
 });
 
 // @decs Signin User & Get Token
@@ -65,7 +65,7 @@ const signinUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // Check if User Exists
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("+password");
 
   // If User Does Not Exist
   if (!user) {
@@ -74,7 +74,7 @@ const signinUser = asyncHandler(async (req, res) => {
   }
 
   // Check password
-  const isMatch = await compareToken(password, user.password);
+  const isMatch = await comparePassword(password, user.password);
 
   // If Password Does Not Match
   if (!isMatch) {
@@ -85,18 +85,16 @@ const signinUser = asyncHandler(async (req, res) => {
   // Logging User In Console
   Logger.info(`${user.name} - ${user.email} just logged in!`);
 
-  // Creating a user object
-  const userObj = {
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    },
-    accessToken: generateToken(user._id),
-  };
+  const accessToken = getJwtToken(user._id);
+  const userObj = { id: user._id, name: user.name, email: user.email };
+
+  // Setting Cookies
+  res
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("user", userObj, cookieOptions);
 
   // Sending response
-  SendResponse(res, StatusCodes.OK, "Logged In Successfully!", true, userObj);
+  SendResponse(res, StatusCodes.OK, "Logged In Successfully!", true);
 });
 
 module.exports = { signupUser, signinUser };
