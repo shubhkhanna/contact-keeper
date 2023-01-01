@@ -8,6 +8,7 @@ const {
 } = require("../helpers/tokenHelper");
 
 const User = require("../models/userModel");
+const SendResponse = require("../utils/sendResponseUtil");
 
 // @decs Create New User
 // @route POST /v1/user/signup
@@ -21,7 +22,7 @@ const signupUser = asyncHandler(async (req, res) => {
 
   // If User Exists
   if (user) {
-    res.status(StatusCodes.BAD_REQUEST);
+    res.status(StatusCodes.CONFLICT);
     throw new Error("Email Already Exists!");
   }
 
@@ -36,15 +37,24 @@ const signupUser = asyncHandler(async (req, res) => {
 
   Logger.info(`${newUser.name} - ${newUser.email} just signed up!`);
 
-  // Sending response
-  res.status(StatusCodes.CREATED).json({
+  // Creating a user object
+  const userObj = {
     user: {
       id: newUser._id,
       name: newUser.name,
       email: newUser.email,
     },
     accessToken: generateToken(newUser._id),
-  });
+  };
+
+  // Sending response
+  SendResponse(
+    res,
+    StatusCodes.CREATED,
+    "Registered Successfully!",
+    true,
+    userObj
+  );
 });
 
 // @decs Signin User & Get Token
@@ -75,15 +85,18 @@ const signinUser = asyncHandler(async (req, res) => {
   // Logging User In Console
   Logger.info(`${user.name} - ${user.email} just logged in!`);
 
-  // Sending response
-  res.status(StatusCodes.OK).json({
+  // Creating a user object
+  const userObj = {
     user: {
       id: user._id,
       name: user.name,
       email: user.email,
     },
     accessToken: generateToken(user._id),
-  });
+  };
+
+  // Sending response
+  SendResponse(res, StatusCodes.OK, "Logged In Successfully!", true, userObj);
 });
 
 module.exports = { signupUser, signinUser };
