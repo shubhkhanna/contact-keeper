@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 const connectDb = require("./config/db");
 const { Logger } = require("./helpers/logger");
 const { NODE_ENV, PORT } = require("./config/keys");
@@ -19,6 +20,9 @@ app.use(helmet());
 
 // handle CORS errors
 app.use(cors());
+
+// cookies parser middleware
+app.use(cookieParser());
 
 // log all requests to the console
 app.use(morgan("combined", { stream: Logger.stream.write }));

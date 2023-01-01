@@ -7,15 +7,12 @@ const { StatusCodes } = require("../config/statusCodes");
 const authHandler = asyncHandler(async (req, res, next) => {
   let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
+  if (req.cookies.accessToken) {
     try {
-      // Get token from header
-      token = req.headers.authorization.split(" ")[1];
+      // Get token from cookie
+      token = req.cookies.accessToken;
 
-      //   decoding the token
+      // decoding the token
       const decoded = jwt.verify(token, JWT_SECRET);
 
       req.user = await User.findById(decoded.userId);
