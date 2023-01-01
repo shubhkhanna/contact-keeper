@@ -3,6 +3,7 @@ const { StatusCodes } = require("../config/statusCodes");
 const contactModel = require("../models/contactModel");
 const deletedContactModel = require("../models/deletedContactModel");
 const { isValidObjectId } = require("mongoose");
+const SendResponse = require("../utils/sendResponseUtil");
 
 // @decs Get all contacts of a user
 // @route GET /v1/contact/
@@ -18,7 +19,13 @@ const getAllContacts = asyncHandler(async (req, res) => {
     });
 
     // sending response
-    res.status(StatusCodes.OK).json({ contacts });
+    SendResponse(
+      res,
+      StatusCodes.OK,
+      "Fetched all contacts successfully!",
+      true,
+      { contacts }
+    );
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Server Error!");
@@ -61,10 +68,13 @@ const createContact = asyncHandler(async (req, res) => {
     const contact = await newContact.save();
 
     // sending response
-    res.status(StatusCodes.CREATED).json({
-      contact,
-      success: true,
-    });
+    SendResponse(
+      res,
+      StatusCodes.CREATED,
+      "Contact created successfully!",
+      true,
+      { contact }
+    );
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Server Error!");
@@ -129,7 +139,9 @@ const updateContact = asyncHandler(async (req, res) => {
     );
 
     // sending response
-    res.status(StatusCodes.OK).json({ updatedContact, success: true });
+    SendResponse(res, StatusCodes.OK, "Contact updated successfully!", true, {
+      updatedContact,
+    });
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Server Error!");
@@ -188,7 +200,7 @@ const deleteContact = asyncHandler(async (req, res) => {
     await deletedContactToCollection.save();
 
     // sending response
-    res.status(StatusCodes.OK).json({ success: true });
+    SendResponse(res, StatusCodes.OK, "Contact deleted successfully!", true);
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Server Error!");
@@ -209,7 +221,13 @@ const getAllDeletedContacts = asyncHandler(async (req, res) => {
       .sort({ expireAt: -1 });
 
     // sending response
-    res.status(StatusCodes.OK).json({ deletedContacts });
+    SendResponse(
+      res,
+      StatusCodes.OK,
+      "Deleted contacts fetched successfully!",
+      true,
+      { deletedContacts }
+    );
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR);
     throw new Error("Server Error!");
