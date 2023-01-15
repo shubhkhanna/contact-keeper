@@ -1,30 +1,19 @@
 import * as yup from "yup";
+import { Strings, ValidationPatterns } from "./globals";
 
 export const signinSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Please enter a valid email!")
-    .required("Please enter your email!"),
+  email: yup.string().email(Strings.emailError).required(Strings.emailRequired),
   password: yup
     .string()
-    .matches(
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/,
-      "Password should be combination of one uppercase , one lowercase, one special char, one digit and min 6 char long!"
-    )
-    .required("Please enter your password!"),
+    .matches(ValidationPatterns.password, Strings.passwordError)
+    .required(Strings.passwordRequired),
 });
 
 export const signupSchema = yup.object().shape({
-  name: yup.string().required("Please enter your name!"),
-  email: yup
-    .string()
-    .email("Please enter a valid email!")
-    .required("Please enter your email!"),
+  name: yup.string().required(Strings.nameError),
+  email: yup.string().email(Strings.emailError).required(Strings.emailRequired),
   password: yup
     .string()
-    .matches(
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,}$/,
-      "Password should be combination of one uppercase , one lowercase, one special char, one digit and min 6 char long!"
-    )
-    .required("Please enter your password!"),
+    .matches(ValidationPatterns.password, Strings.passwordError)
+    .required(Strings.passwordRequired),
 });
