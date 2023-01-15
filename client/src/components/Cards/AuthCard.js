@@ -1,10 +1,14 @@
+import { useEffect } from "react";
 import { useFormik } from "formik";
-import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Button from "../Button";
 import InputField from "../InputField";
 import { Icons, Strings } from "../../utils/globals";
 import { AppRoutes } from "../../utils/routes";
+import { signinUser, signupUser } from "../../redux/services/userServices";
+import { toast } from "react-hot-toast";
+import ErrorToast from "../Toast/ErrorToast";
 
 const AuthCard = ({
   authType,
@@ -15,16 +19,17 @@ const AuthCard = ({
   validationSchema,
 }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // submit handler
   const onSubmit = (values) => {
     if (authType === Strings.signin) {
       const { email, password } = values;
-      console.log(values);
-      // dispatch(signinUser({ email, password }));
+      dispatch(signinUser({ email, password }));
     } else {
       const { name, email, password } = values;
-      console.log(values);
+      dispatch(signupUser({ name, email, password }));
     }
   };
 
@@ -37,11 +42,27 @@ const AuthCard = ({
     handleBlur,
     handleChange,
     handleSubmit,
+    setSubmitting,
   } = useFormik({
     initialValues,
     validationSchema,
     onSubmit,
   });
+
+  const { user, error } = useSelector((state) => state.user);
+  const redirect = location.state?.path || AppRoutes.home;
+
+  useEffect(() => {
+    if (user) navigate(redirect, { replace: true });
+
+    // error handling
+    if (error) {
+      setSubmitting(false);
+      toast.custom((t) => (
+        <ErrorToast id={t.id} msg={`${error.statusCode}, ${error.message}`} />
+      ));
+    }
+  }, [user, navigate, redirect, error]);
 
   return (
     <div className="flex flex-col items-center justify-center bg-white rounded-lg shadow-md px-5 py-7 mt-4 w-full max-w-md">
