@@ -14,8 +14,8 @@ const SendResponse = require("../utils/sendResponseUtil");
 const cookieOptions = {
   maxAge: 1000 * 60 * 60 * 24 * 10, // 10 days validity
   httpOnly: true,
-  // secure: true, // Uncomment this if you are using HTTPS
-  sameSite: "none",
+  secure: true,
+  sameSite: "strict",
 };
 
 // @decs Create New User
@@ -45,16 +45,20 @@ const signupUser = asyncHandler(async (req, res) => {
 
   Logger.info(`${newUser.name} - ${newUser.email} just signed up!`);
 
-  const accessToken = getJwtToken(newUser._id);
-  const userObj = { id: newUser._id, name: newUser.name, email: newUser.email };
-
-  // Setting Cookies
-  res
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("user", userObj, cookieOptions);
+  const userObj = {
+    name: newUser.name,
+    email: newUser.email,
+    accessToken: getJwtToken(newUser._id),
+  };
 
   // Sending response
-  SendResponse(res, StatusCodes.CREATED, "Registered Successfully!", true);
+  SendResponse(
+    res,
+    StatusCodes.CREATED,
+    "Registered Successfully!",
+    true,
+    userObj
+  );
 });
 
 // @decs Signin User & Get Token
@@ -85,16 +89,14 @@ const signinUser = asyncHandler(async (req, res) => {
   // Logging User In Console
   Logger.info(`${user.name} - ${user.email} just logged in!`);
 
-  const accessToken = getJwtToken(user._id);
-  const userObj = { id: user._id, name: user.name, email: user.email };
-
-  // Setting Cookies
-  res
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("user", userObj, cookieOptions);
+  const userObj = {
+    name: user.name,
+    email: user.email,
+    accessToken: getJwtToken(user._id),
+  };
 
   // Sending response
-  SendResponse(res, StatusCodes.OK, "Logged In Successfully!", true);
+  SendResponse(res, StatusCodes.OK, "You are now logged in!", true, userObj);
 });
 
 module.exports = { signupUser, signinUser };
