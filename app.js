@@ -6,7 +6,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const connectDb = require("./config/db");
 const { Logger } = require("./helpers/logger");
-const { NODE_ENV, PORT, CLIENT_URL } = require("./config/keys");
+const { NODE_ENV, PORT } = require("./config/keys");
 const { BadRequestError, NotFoundError } = require("./middleware/errorHandler");
 
 // create express app
@@ -22,7 +22,6 @@ app.use(helmet());
 app.use(
   cors({
     credentials: true,
-    origin: CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
