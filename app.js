@@ -19,12 +19,7 @@ connectDb();
 app.use(helmet());
 
 // handle CORS errors
-app.use(
-  cors({
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+app.use(cors());
 
 // cookies parser middleware
 app.use(cookieParser());

@@ -62,6 +62,7 @@ const AuthCard = ({
         <ErrorToast id={t.id} msg={`${error.statusCode}, ${error.message}`} />
       ));
     }
+    // eslint-disable-next-line
   }, [user, navigate, redirect, error]);
 
   return (
